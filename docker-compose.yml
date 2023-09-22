@@ -1,0 +1,47 @@
+version: '3.7'
+
+services:
+  app-laravel:
+    build:
+      context: ./docker
+      dockerfile: app-laravel.Dockerfile
+    working_dir: /var/www
+    ports:
+      - 5001:5001
+    volumes:
+      - ./:/var/www
+    depends_on:
+      - database
+
+  nginx-web:
+    build:
+      context: ./docker
+      dockerfile: nginx.Dockerfile
+    working_dir: /var/www
+    volumes:
+    - ./:/var/www
+    ports:
+      - 80:80
+
+  database:
+    image: mariadb:10.4
+    ports:
+      - 3306:3306
+    restart: always
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+  
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    ports:
+      - 5000:80
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=database
+    depends_on:
+      - database
+
+volumes:
+  mariadb-data:
